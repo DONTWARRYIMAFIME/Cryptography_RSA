@@ -1,10 +1,12 @@
 package by.cryptography.RSA.RSAPack;
 
-public class PrivateKey {
-    private final long e;
-    private final long r;
+import java.math.BigInteger;
 
-    public PrivateKey(long e, long r) {
+public class PrivateKey {
+    private final BigInteger e;
+    private final BigInteger r;
+
+    public PrivateKey(BigInteger e, BigInteger r) {
         this.e = e;
         this.r = r;
     }
@@ -14,7 +16,7 @@ public class PrivateKey {
         String[] symbols = str.split("-");
 
         for (String s : symbols) {
-            char symbol = (char) (RSAUtils.fastExp(Integer.parseInt(s), e, r));
+            char symbol = (char) (RSAUtils.fastExp(new BigInteger(s), e, r)).intValue();
 
             if ('-' != symbol)
                 result.append(symbol);

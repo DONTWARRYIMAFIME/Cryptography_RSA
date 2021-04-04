@@ -1,10 +1,12 @@
 package by.cryptography.RSA.RSAPack;
 
-public class PublicKey {
-    private final long d;
-    private final long r;
+import java.math.BigInteger;
 
-    public PublicKey(long d, long r) {
+public class PublicKey {
+    private final BigInteger d;
+    private final BigInteger r;
+
+    public PublicKey(BigInteger d, BigInteger r) {
         this.d = d;
         this.r = r;
     }
@@ -14,7 +16,7 @@ public class PublicKey {
         int len = str.length();
 
         for (int i = 0; i < len; i++) {
-            result.append(RSAUtils.fastExp((int)str.charAt(i), d, r));
+            result.append(RSAUtils.fastExp(BigInteger.valueOf(str.charAt(i)), d, r));
             result.append("-");
         }
 

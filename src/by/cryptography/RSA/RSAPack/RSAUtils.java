@@ -1,81 +1,85 @@
 package by.cryptography.RSA.RSAPack;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.math.BigInteger;
+import java.util.Random;
 
 public class RSAUtils {
 
-    public static long calculateTheEulerFunction(long p, long q) {
-        return (p - 1) * (q - 1);
+    public static BigInteger calculateTheEulerFunction(BigInteger p, BigInteger q) {
+        return p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
     }
 
-    public static long fastExp(long number, long power, long module) {
-        long tempNumber = number;
-        long tempPower = power;
-        long result = 1;
-
-        while (tempPower != 0) {
-            while (tempPower % 2 == 0) {
-                tempPower /= 2;
-                tempNumber *= tempNumber;
-                tempNumber %= module;
-            }
-            tempPower--;
-            result = (result * tempNumber) % module;
+    public static BigInteger fastExp(BigInteger number, BigInteger power, BigInteger module) {
+        if (power.equals(BigInteger.ZERO)) {
+            return BigInteger.ONE;
         }
 
-        return result;
-    }
+        BigInteger temp = fastExp(number, power.divide(BigInteger.TWO), module);
 
-    public static boolean isPrime(long number) {
-        for (int i = 2; i < number; i++) {
-            if (number % i == 0) return false;
-        }
-
-        return number > 1;
-    }
-
-    public static boolean isCoprime(long a, long b) {
-        if (a == b) {
-            return a == 1;
+        if (power.remainder(BigInteger.TWO).equals(BigInteger.ZERO)) {
+            return (temp.multiply(temp)).remainder(module);
         } else {
-            if (a > b) {
-                return isCoprime(a - b, b);
-            } else {
-                return isCoprime(b - a, a);
-            }
-        }
-    }
-
-    public static long generateE(long f) {
-        Set<Long> set = new HashSet<>();
-
-        for (long e = 2; e < f - 1; e++) {
-            if (isPrime(e) && isCoprime(e, f)) {
-                set.add(e);
-            }
+            return (number.multiply(temp).multiply(temp)).remainder(module);
         }
 
-        return set.iterator().next();
     }
 
-    public static long generateD(long a, long b) {
-        long d0 = a; long d1 = b;
-        long x0 = 1; long x1 = 0;
-        long y0 = 0; long y1 = 1;
+    public static boolean isPrime(BigInteger number) {
+        return number.isProbablePrime(1);
+    }
 
-        while (d1 > 1) {
-            long q = d0 / d1;
-            long d2 = d0 % d1;
-            long x2 = x0 - q * x1;
-            long y2 = y0 - q * y1;
+    public static boolean isRelativePrime(BigInteger a, BigInteger b) {
+        return a.gcd(b).equals(BigInteger.ONE);
+    }
+
+    public static BigInteger generateE(BigInteger f) {
+
+        Random random = new Random();
+        int stopNumber = random.nextInt(f.bitLength());
+
+        int iterator = 0;
+        BigInteger e = BigInteger.ONE;
+
+        while (true) {
+            if (iterator == stopNumber) {
+
+                if (isRelativePrime(e, f)) {
+                    return e;
+                }
+
+                iterator = 0;
+                stopNumber = random.nextInt(f.bitLength());
+
+            }
+
+            iterator++;
+            e = e.nextProbablePrime();
+        }
+
+    }
+
+    public static BigInteger generateD(BigInteger a, BigInteger b) {
+        BigInteger d0 = a;
+        BigInteger d1 = b;
+
+        BigInteger x0 = BigInteger.ONE;
+        BigInteger x1 = BigInteger.ZERO;
+
+        BigInteger y0 = BigInteger.ZERO;
+        BigInteger y1 = BigInteger.ONE;
+
+        while (d1.compareTo(BigInteger.ONE) == 1) {
+            BigInteger q = d0.divide(d1);
+            BigInteger d2 = d0.remainder(d1);
+            BigInteger x2 = x0.subtract(q.multiply(x1));
+            BigInteger y2 = y0.subtract(q.multiply(y1));
 
             d0 = d1; d1 = d2;
             x0 = x1; x1 = x2;
             y0 = y1; y1 = y2;
         }
 
-        return y1 > 0 ? y1 : y1 + a;
+        return y1.compareTo(BigInteger.ZERO) == 1 ? y1 : y1.add(a);
     }
 
 }
